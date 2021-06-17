@@ -57,8 +57,10 @@ SECTIONS
   .interrupts :
   {
     __VECTOR_TABLE = .;
+    __interrupts_start__ = .;
     . = ALIGN(4);
     KEEP(*(.isr_vector))     /* Startup code */
+    __interrupts_end__ = .;
     . = ALIGN(4);
   } > m_interrupts
 
@@ -86,9 +88,11 @@ SECTIONS
   {
     . = ALIGN(4);
     __CODE_RAM = .;
+    __code_ram_start__ = .;
     *(.code_ram)               /* Custom section for storing code in RAM */
     __CODE_ROM = .;            /* Symbol is used by start-up for data initialization. */
     __CODE_END = .;            /* No copy */
+    __code_ram_end__ = .;
     . = ALIGN(4);
   } > m_text
 
@@ -170,7 +174,11 @@ SECTIONS
   /* Use __attribute__((section (".customSection"))) to place data here. */
   .customSectionBlock  ORIGIN(m_data) :
   {
+    __customSection_start__ = .;
     KEEP(*(.customSection))  /* Keep section even if not referenced. */
+    __customSection_end__ = .;
+    __CUSTOM_ROM = .;
+    __CUSTOM_END = .;
   } > m_data
 
   .data :
@@ -204,6 +212,7 @@ SECTIONS
   {
     . = ALIGN(8);
     __end__ = .;
+    __heap_start__ = .;
     PROVIDE(end = .);
     PROVIDE(_end = .);
     PROVIDE(__end = .);
@@ -211,12 +220,7 @@ SECTIONS
     . += HEAP_SIZE;
     __HeapLimit = .;
     __heap_limit = .;
-  } > m_data
-
-  .stack :
-  {
-    . = ALIGN(8);
-    . += STACK_SIZE;
+    __heap_end__ = .;
   } > m_data
 
   /* Initializes stack on the end of block */
@@ -224,6 +228,19 @@ SECTIONS
   __StackLimit = __StackTop - STACK_SIZE;
   PROVIDE(__stack = __StackTop);
 
+  .stack __StackLimit :
+  {
+    . = ALIGN(8);
+    __stack_start__ = .;
+    . += STACK_SIZE;
+    __stack_end__ = .;
+  } > m_data
+
+  /* Labels required by EWL */
+  __START_BSS = __BSS_START;
+  __END_BSS = __BSS_END;
+  __SP_INIT = __StackTop;  
+  
   .ARM.attributes 0 : { *(.ARM.attributes) }
 
   ASSERT(__StackLimit >= __HeapLimit, "region m_data overflowed with stack and heap")
