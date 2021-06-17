@@ -178,9 +178,9 @@ void UART_Init(LPUART_Type *pUART, uint32_t u32SysClk, uint32_t u32Baud)
 
 
 	/* Calculate baud settings */
-	pUART->BAUD |= LPUART_BAUD_OSR(15);
+	pUART->BAUD = (pUART->BAUD & ~LPUART_BAUD_OSR_MASK) | LPUART_BAUD_OSR(15);
 	u16Sbr = (u32SysClk/u32Baud)/16;
-	pUART->BAUD |= LPUART_BAUD_SBR(u16Sbr);
+	pUART->BAUD = (pUART->BAUD & ~LPUART_BAUD_SBR_MASK) LPUART_BAUD_SBR(u16Sbr);
 
 	/* Enable receiver and transmitter */
 	pUART->CTRL |= LPUART_CTRL_TE_MASK | LPUART_CTRL_RE_MASK;

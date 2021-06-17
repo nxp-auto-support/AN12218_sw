@@ -14,5 +14,5 @@ void clock_initi(void){
 }
 
 void reset_clock(void){
-	SCG->FIRCDIV |= SCG_FIRCDIV_FIRCDIV2(0b000); 	/* Disable FIRC divider  */
+	SCG->FIRCDIV &= ~SCG_FIRCDIV_FIRCDIV2(0b111); 	/* Disable FIRC divider  */
 }
